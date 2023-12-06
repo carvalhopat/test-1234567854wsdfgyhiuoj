@@ -1,0 +1,46 @@
+name: Make a release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump-type:
+        description: "Select bump type"
+        type: choice
+        required: true
+        default: |
+          'patch'
+        options:
+          - major
+          - minor
+          - patch
+
+permissions:
+  id-token: write
+  pull-requests: write
+  contents: write
+
+jobs:
+  make-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bump version with pnpm
+        shell: bash
+        id: bumped-version
+        run: |
+          BUMPED_VERSION=$(npm version ${{ inputs.bump-type }} --no-git-tag-version)
+          echo "version=$BUMPED_VERSION" >> $GITHUB_OUTPUT
+      - name: Add changes to a commit on a new branch
+        shell: bash
+        run: |
+          git checkout -b ${{ steps.bumped-version.outputs.version }}
+          git add .
+          git commit -m ${{ steps.bumped-version.outputs.version }} --no-verify
+      - name: Push new branch to origin
+        shell: bash
+        run: |
+          git push origin ${{ steps.bumped-version.outputs.version }} --no-verify
+      - name: Create Pull Request
+        shell: bash
+        run: |
+          gh pr create --head --title ${{ steps.bumped-version.outputs.version }} --label "enhancement" -b "Release new version"
