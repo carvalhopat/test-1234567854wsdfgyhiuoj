@@ -24,12 +24,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Bump version with pnpm
+      - name: Bump version with npm
         shell: bash
         id: bumped-version
         run: |
           BUMPED_VERSION=$(npm version ${{ inputs.bump-type }} --no-git-tag-version)
           echo "version=$BUMPED_VERSION" >> $GITHUB_OUTPUT
+      - name: Set git config attributes
+        shell: bash
+        run: |
+          git config user.email "gh-action-pr@localhost.org"
+          git config user.name "Github Action PR Bot"
       - name: Add changes to a commit on a new branch
         shell: bash
         run: |
