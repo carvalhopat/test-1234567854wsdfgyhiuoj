@@ -48,4 +48,4 @@ jobs:
       - name: Create Pull Request
         shell: bash
         run: |
-          gh pr create --head --title ${{ steps.bumped-version.outputs.version }} --label "enhancement" -b "Release new version"
+          gh pr create --head --title "${{ steps.bumped-version.outputs.version }}" --label "enhancement" -b "Release new version"
